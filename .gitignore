@@ -126,3 +126,9 @@ dmypy.json
 .pyre/
 
 .gitignore
+.idea/TeachLMLearnML.iml
+.idea/inspectionProfiles/
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+"\345\255\246\344\271\240\346\226\207\346\241\243/"
