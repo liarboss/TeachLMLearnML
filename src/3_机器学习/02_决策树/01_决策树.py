@@ -51,6 +51,8 @@ clf = tree.DecisionTreeClassifier()
 clf.fit(attr_pd, resultMat)
 print(clf)
 
+# clf.score()
+
 # 使用决策树进行预测
 result = clf.predict([[1, 1, 1, 0]])  # 输入也必须是数字的。分别代表了每个数字所代表的属性的字符串值
 print(result)
