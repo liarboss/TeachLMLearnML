@@ -3,7 +3,7 @@
 """
 # @Time : 2022/4/5 17:46 
 # @Author : cl
-# @File : 02_评估指标2.py 
+# @File : 02_分类评估指标2.py
 # @Software: PyCharm
 """
 
