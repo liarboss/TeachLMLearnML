@@ -7,10 +7,12 @@
 """
 
 # 1. 数据集
+import warnings
+import matplotlib.pyplot as plt
 from sklearn.datasets import load_boston
 from sklearn.metrics import mean_absolute_error
 from sklearn.neural_network import MLPRegressor
-import matplotlib.pyplot as plt
+
 
 boston = load_boston()
 data = boston['data']  # shape=(506, 13)
@@ -32,10 +34,11 @@ train_data_std = std.fit_transform(train_data)
 test_data_std = std.transform(test_data)
 
 # 3. 构建模型
-regr = MLPRegressor(solver='adam', hidden_layer_sizes=(50, 50), activation='tanh', max_iter=5000).fit(train_data_std,
-                                                                                                      train_target)
-y_pred = regr.predict(test_data_std)
+regr = MLPRegressor(solver='adam', hidden_layer_sizes=(50, 50), activation='tanh', max_iter=5000)
+regr.fit(train_data_std,train_target)
 
+print(regr.score(train_data_std, train_target))
+y_pred = regr.predict(test_data_std)
 # 4. 评价回归模型
 """
 关于回归模型的评价指标如下：
