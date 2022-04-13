@@ -210,3 +210,168 @@ normalizer.transform(X)
 
 normalizer.transform([[-1., 1., 0.]])
 # array([[-0.70...,  0.70...,  0.  ...]])
+
+
+"""
+要把标称型特征(categorical features) 转换为这样的整数编码(integer codes), 我们可以使用 OrdinalEncoder 。 
+这个估计器把每一个categorical feature变换成 一个新的整数数字特征 (0 到 n_categories - 1):
+这样的整数特征表示并不能在scikit-learn的估计器中直接使用，因为这样的连续输入，估计器会认为类别之间是有序的，但实际却是无序的。
+"""
+
+enc = preprocessing.OrdinalEncoder()
+X = [['male', 'from US', 'uses Safari'], ['female', 'from Europe', 'uses Firefox']]
+enc.fit(X)
+# OrdinalEncoder(categories='auto', dtype=<... 'numpy.float64'>)
+enc.transform([['female', 'from US', 'uses Safari']])
+# array([[0., 1., 1.]])
+
+"""
+另外一种将标称型特征转换为能够被scikit-learn中模型使用的编码是one-of-K， 又称为 独热码或dummy encoding。 这种编码类型已经在类OneHotEncoder中实现。
+该类把每一个具有n_categories个可能取值的categorical特征变换为长度为n_categories的二进制特征向量，里面只有一个地方是1，其余位置都是0。
+"""
+
+enc = preprocessing.OneHotEncoder()
+X = [['male', 'from US', 'uses Safari'], ['female', 'from Europe', 'uses Firefox']]
+enc.fit(X)
+# OneHotEncoder(categorical_features=None, categories=None,
+#        dtype=<... 'numpy.float64'>, handle_unknown='error',
+#        n_values=None, sparse=True)
+enc.transform([['female', 'from US', 'uses Safari'],
+               ['male', 'from Europe', 'uses Safari']]).toarray()
+# array([[1., 0., 0., 1., 0., 1.],
+#        [0., 1., 1., 0., 0., 1.]])
+
+
+enc.categories_
+# [array(['female', 'male'], dtype=object), array(['from Europe', 'from US'], dtype=object), array(['uses Firefox', 'uses Safari'], dtype=object)]
+
+# 可以使用参数categories_显式地指定这一点。我们的数据集中有两种性别、四种可能的大陆和四种web浏览器
+genders = ['female', 'male']
+locations = ['from Africa', 'from Asia', 'from Europe', 'from US']
+browsers = ['uses Chrome', 'uses Firefox', 'uses IE', 'uses Safari']
+enc = preprocessing.OneHotEncoder(categories=[genders, locations, browsers])
+# Note that for there are missing categorical values for the 2nd and 3rd
+# feature
+X = [['male', 'from US', 'uses Safari'], ['female', 'from Europe', 'uses Firefox']]
+enc.fit(X)
+# OneHotEncoder(categorical_features=None,
+#        categories=[...], drop=None,
+#        dtype=<... 'numpy.float64'>, handle_unknown='error',
+#        n_values=None, sparse=True)
+print(enc.transform([['male', 'from Asia', 'uses Chrome']]).toarray())
+# array([[1., 0., 0., 1., 0., 0., 1., 0., 0., 0.]])
+
+
+# 如果训练数据可能缺少分类特性，通常最好指定handle_unknown='ignore'，而不是像上面那样手动设置类别。当指定handle_unknown='ignore'，
+# 并且在转换过程中遇到未知类别时，不会产生错误，但是为该特性生成的一热编码列将全部为零(handle_unknown='ignore'只支持一热编码):
+enc = preprocessing.OneHotEncoder(handle_unknown='ignore')
+X = [['male', 'from US', 'uses Safari'], ['female', 'from Europe', 'uses Firefox']]
+enc.fit(X)
+# OneHotEncoder(categorical_features=None, categories=None, drop=None,
+#        dtype=<... 'numpy.float64'>, handle_unknown='ignore',
+#        n_values=None, sparse=True)
+enc.transform([['female', 'from Asia', 'uses Chrome']]).toarray()
+# array([[1., 0., 0., 0., 0., 0.]])
+
+
+"""
+还可以使用drop参数将每个列编码为n_categories-1列，而不是n_categories列。此参数允许用户为要删除的每个特征指定类别。这对于避免某些分类器中输入矩阵的共线性是有用的。
+例如，当使用非正则化回归(线性回归)时，这种功能是有用的，因为共线性会导致协方差矩阵是不可逆的。当这个参数不是None时，handle_unknown必须设置为error:
+"""
+
+X = [['male', 'from US', 'uses Safari'], ['female', 'from Europe', 'uses Firefox']]
+drop_enc = preprocessing.OneHotEncoder(drop='first').fit(X)
+drop_enc.categories_
+# [array(['female', 'male'], dtype=object), array(['from Europe', 'from US'], dtype=object), array(['uses Firefox', 'uses Safari'], dtype=object)]
+drop_enc.transform(X).toarray()
+# array([[1., 1., 1.],
+#        [0., 0., 0.]])
+
+
+"""
+离散化 (Discretization) (有些时候叫 量化(quantization) 或 装箱(binning)) 提供了将连续特征划分为离散特征值的方法。 
+某些具有连续特征的数据集会受益于离散化，因为 离散化可以把具有连续属性的数据集变换成只有名义属性(nominal attributes)的数据集。 
+(译者注： nominal attributes 其实就是 categorical features, 可以译为 名称属性，名义属性，符号属性，离散属性 等)
+
+One-hot 编码的离散化特征 可以使得一个模型更加的有表现力(expressive)，同时还能保留其可解释性(interpretability)。 
+比如，用离散化器进行预处理可以给线性模型引入非线性。
+"""
+
+# 5.3.5.1 K-bins 离散化
+X = np.array([[-3., 5., 15],
+              [0., 6., 14],
+              [6., 3., 11]])
+est = preprocessing.KBinsDiscretizer(n_bins=[3, 2, 2], encode='ordinal').fit(X)
+
+# 特征 1:[-∞,-1],[-1,2),[2,∞)
+# 特征 2:[-∞,5),[5,∞)
+# 特征 3:[-∞,14],[14,∞)
+# 基于这些 bin 区间, X 就被变换成下面这样:
+
+est.transform(X)
+# array([[ 0., 1., 1.],
+#        [ 1., 1., 1.],
+#        [ 2., 0., 0.]])
+
+
+"""
+5.3.5.2 特征二值化
+特征二值化 是 将数值特征用阈值过滤得到布尔值 的过程。这对于下游的概率型模型是有用的，它们假设输入数据是多值 伯努利分布(Bernoulli distribution) 。
+"""
+X = [[1., -1., 2.],
+     [2., 0., 0.],
+     [0., 1., -1.]]
+
+binarizer = preprocessing.Binarizer().fit(X)  # fit does nothing
+print(binarizer)
+# Binarizer(copy=True, threshold=0.0)
+
+print(binarizer.transform(X))
+# array([[ 1.,  0.,  1.],
+#  [ 1.,  0.,  0.],
+#  [ 0.,  1.,  0.]])
+
+# 也可以为二值化器赋一个阈值:
+binarizer = preprocessing.Binarizer(threshold=1.1)
+binarizer.transform(X)
+# array([[ 0.,  0.,  1.],
+#  [ 1.,  0.,  0.],
+#  [ 0.,  0.,  0.]])
+
+
+"""
+5.3.7 生成多项式特征
+在机器学习中，通过增加一些输入数据的非线性特征来增加模型的复杂度通常是有效的。一个简单通用的办法是使用多项式特征，
+这可以获得特征的更高维度和互相间关系的项。这在 PolynomialFeatures 中实现:
+"""
+
+import numpy as np
+from sklearn.preprocessing import PolynomialFeatures
+
+X = np.arange(6).reshape(3, 2)
+X
+# array([[0, 1],
+#  [2, 3],
+#  [4, 5]])
+poly = PolynomialFeatures(2)
+poly.fit_transform(X)
+# array([[  1.,   0.,   1.,   0.,   0.,   1.],
+#  [  1.,   2.,   3.,   4.,   6.,   9.],
+#  [  1.,   4.,   5.,  16.,  20.,  25.]])
+
+
+# 在一些情况下，只需要特征间的交互项，这可以通过设置 interaction_only=True 来得到
+
+X = np.arange(9).reshape(3, 3)
+X
+# array([[0, 1, 2],
+#  [3, 4, 5],
+#  [6, 7, 8]])
+poly = PolynomialFeatures(degree=3, interaction_only=True)
+poly.fit_transform(X)
+# array([[   1.,    0.,    1.,    2.,    0.,    0.,    2.,    0.],
+#  [   1.,    3.,    4.,    5.,   12.,   15.,   20.,   60.],
+#  [   1.,    6.,    7.,    8.,   42.,   48.,   56.,  336.]])
+
+
+
