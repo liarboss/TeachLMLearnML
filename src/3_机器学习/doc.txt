@@ -13,7 +13,7 @@
 4. 集成方法+bagging+随机森林+网格搜索
 5. adaboost+数据预处理
 6. 神经网络
-
+7. 支持向量机+matplotlib
 
 
 ?. eda探索性数据分析

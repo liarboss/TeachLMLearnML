@@ -3,7 +3,7 @@
 """
 # @Time : 2022/4/4 11:44 
 # @Author : cl
-# @File : 02_numpy补充.py 
+# @File : 02_numpy2.py
 # @Software: PyCharm
 """
 
