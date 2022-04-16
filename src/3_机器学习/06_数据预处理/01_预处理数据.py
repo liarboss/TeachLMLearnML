@@ -117,7 +117,6 @@ X_test = np.array([[-3., -1., 4.]])
 X_test_maxabs = max_abs_scaler.transform(X_test)
 X_test_maxabs
 # array([[-1.5, -1. ,  2. ]])
-max_abs_scaler.scale_
 # array([ 2.,  1.,  2.])
 
 
