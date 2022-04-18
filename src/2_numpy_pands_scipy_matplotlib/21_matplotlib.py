@@ -258,7 +258,73 @@ subplots函数主要是两个参数：nrows表示行数，ncols表示列数；�
 """
 实战：绘制股票趋势图
 """
+# import tushare as ts
+#
+# df = ts.get_k_data("000001", start="2020-05-08", end="2020-08-08")
+# print(df)
+#
+# df1 = df.set_index("date")
+# print(df1)
+#
+# """
+# 默认绘图
+# 我们使用收盘价close来绘制默认的图形
+# """
+# fig = df1["close"].plot()
+# plt.show()
+#
+# # 添加标题
+# # Pandas直接绘图
+# fig = df["close"].plot(title="PingAn")
+# plt.show()
+#
+# # 使用Matplotlib绘图
+#
+# # 获取数据
+# # import tushare as ts
+# # df = ts.get_k_data("000001",start="2018-08-08",end="2020-08-08")
+#
+# # 调整时间
+# from datetime import datetime
+#
+# df["date"] = df["date"].apply(lambda x: datetime.strptime(x, "%Y-%m-%d"))
+#
+# # 绘制折线图
+# import matplotlib.pyplot as plt
+#
+# # %matplotlib inline
+#
+# plt.plot(df["date"], df["close"])
+# # 标题
+# plt.title("PingAn")
+# # 旋转
+# plt.xticks(rotation=-45)
+# plt.show()
+
+
+"""
+实战进阶：绘制K线图
+"""
 import tushare as ts
 
-df = ts.get_k_data("000001", start="2020-05-08", end="2020-08-08")
-print(df)
+df = ts.get_k_data("000001", start="2020-09-08", end="2021-03-08")
+print(df.head())
+
+"""
+日期格式转化
+定义一个将字符串形式的日期转成数字型的函数：
+"""
+from matplotlib.pylab import date2num
+import datetime
+
+
+def date_to_number(dates):
+    number_time = []
+    for date in dates:
+        # 字符串转时间戳格式
+        date_time = datetime.datetime.strptime(date, "%Y-%m-%d")
+        # 时间戳格式转成数字格式
+        number_date = date2num(date_time)
+        number_time.append(number_date)
+    return number_time
+
