@@ -43,7 +43,7 @@ from sklearn.naive_bayes import GaussianNB
 
 gnb = GaussianNB()
 gnb.fit(x_train, y_train)
-gnb.score(x_test, y_test)
+print(gnb.score(x_test, y_test))
 # 画图
 z = gnb.predict(np.c_[(xx.ravel(), yy.ravel())]).reshape(xx.shape)
 plt.pcolormesh(xx, yy, z, cmap=plt.cm.Pastel1)
