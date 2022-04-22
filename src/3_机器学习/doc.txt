@@ -16,7 +16,7 @@ f6. 神经网络
 f7. 支持向量机+matplotlib
 8. 朴素贝叶斯
 9. 特征选择+特征提取
-10. jieba分词+tf-idf
+10. tf-idf
 
 ?. eda探索性数据分析
 
